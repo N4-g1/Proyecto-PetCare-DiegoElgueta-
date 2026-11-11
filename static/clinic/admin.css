@@ -1,0 +1,28 @@
+:root { --petcare-green: #315744; --petcare-paper: #f5f4ef; --petcare-line: #e8e6de; }
+body { background: var(--petcare-paper); font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+#header { min-height: 58px; padding: 0 26px; background: var(--petcare-green); }
+#branding { display: flex; min-height: 58px; align-items: center; }
+#site-name { font-size: 15px; font-weight: 650; letter-spacing: -.2px; }
+#site-name a { display: flex; align-items: center; gap: 8px; color: #fffdf6; }
+.petcare-admin-mark { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 8px; color: var(--petcare-green); background: #e9ebdc; font-size: 15px; }
+.petcare-admin-divider { color: #aab9a8; font-weight: 400; }
+#user-tools { padding-top: 21px; font-size: 10px; }
+#user-tools a { color: #edf0e7; }
+#content { padding: 24px 28px 40px; }
+#content h1, .dashboard #content h1 { color: #293d33; font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif; font-size: 27px; font-weight: 500; }
+#content-main, #content-related { border-color: var(--petcare-line); border-radius: 5px; background: #fffefa; }
+.module, .inline-group { border: 1px solid var(--petcare-line); border-radius: 5px; box-shadow: none; }
+.module h2, .module caption, .inline-group h2 { background: #edf2eb; color: #315744; font-size: 11px; font-weight: 650; }
+.module table th, .module table td { padding: 9px 11px; border-color: #efeee8; }
+.module table th a, .object-tools a:link, .object-tools a:visited { color: #426c52; }
+.button, input[type=submit], input[type=button], .submit-row input, a.button { border-radius: 4px; background: #315744; }
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover { background: #244635; }
+div.breadcrumbs { padding: 10px 28px; background: #e9eee6; color: #6a796b; font-size: 10px; }
+div.breadcrumbs a { color: #315744; }
+#changelist-filter { border-color: var(--petcare-line); background: #fffefa; }
+#changelist-filter h2 { color: #315744; background: #edf2eb; font-size: 10px; }
+#changelist-filter li.selected a { color: #315744; }
+#changelist table thead th { background: #faf9f5; }
+#changelist .paginator, .paginator { border-color: var(--petcare-line); }
+.messagelist li { border-radius: 4px; font-size: 11px; }
+@media (max-width: 760px) { #content { padding: 16px 12px 30px; } #header { padding: 0 12px; } #user-tools { padding-top: 12px; } #content h1 { font-size: 23px; } }

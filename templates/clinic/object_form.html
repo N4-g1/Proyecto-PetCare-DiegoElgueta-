@@ -1,0 +1,26 @@
+{% extends "clinic/base.html" %}
+{% load static %}
+{% block title %}{% if is_edit %}Editar {{ config.singular }}{% else %}{{ config.new_label }}{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{% url list_url %}">{{ config.title }}</a><b>/</b>{% if is_edit %}Editar{% else %}Nuevo registro{% endif %}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="overline">{{ config.title|upper }}</p><h1>{% if is_edit %}Editar {{ config.singular }}{% else %}{{ config.new_label }}{% endif %}</h1><p class="page-intro">{{ config.description }}</p></div></div>
+<section class="form-panel panel">
+  <form method="post" novalidate{% if list_type == "appointments" %} data-availability-url="{% url 'availability' %}" data-appointment-id="{{ object.pk|default:'' }}"{% endif %}>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-grid">
+      {% for field in form %}
+      <div class="form-field{% if field.name == 'notes' or field.name == 'diagnosis' or field.name == 'treatment' or field.name == 'prescription' or field.name == 'exams' or field.name == 'reason' or field.name == 'address' %} field-wide{% endif %}{% if field.name == 'species_detail' %} field-wide species-detail-field{% endif %}"{% if field.name == 'species_detail' and form.species.value != 'Otro' %} hidden{% endif %}>
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required-mark"> *</span>{% elif field.name == 'species_detail' %}<span class="required-mark" hidden> *</span>{% endif %}</label>
+        {{ field }}
+        {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    {% if list_type == "appointments" %}<p class="availability-note"><span>i</span> Al elegir profesional, día y duración verás solo los horarios realmente disponibles.</p><div class="availability-message" aria-live="polite"></div>{% endif %}
+    <div class="form-actions"><a class="button button-secondary" href="{% url list_url %}">Cancelar</a><button class="button button-primary" type="submit">Guardar {{ config.singular }} <span>→</span></button></div>
+  </form>
+</section>
+{% endblock %}
+{% block extra_js %}{% if list_type == "appointments" %}<script src="{% static 'clinic/availability.js' %}" defer></script>{% elif list_type == "pets" %}<script src="{% static 'clinic/pet-form.js' %}" defer></script>{% endif %}{% endblock %}

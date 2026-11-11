@@ -1,0 +1,7 @@
+{% extends "clinic/base.html" %}
+{% block title %}Eliminar {{ config.singular }}{% endblock %}
+{% block breadcrumb %}<a href="{% url config_key|add:'_list' %}">{{ config.title }}</a><b>/</b>Eliminar{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="overline">CONFIRMAR CAMBIO</p><h1>Eliminar {{ config.singular }}</h1><p class="page-intro">Revisa esta acción antes de continuar.</p></div></div>
+<section class="panel delete-panel"><div class="delete-symbol">!</div><h2>¿Quieres eliminar este registro?</h2><p>Vas a eliminar <strong>{{ object }}</strong>. {% if config_key == "tutors" or config_key == "pets" %}Los registros relacionados pueden impedir la eliminación para conservar el historial clínico.{% else %}Esta acción no se puede deshacer.{% endif %}</p><form method="post">{% csrf_token %}<a class="button button-secondary" href="{% url config_key|add:'_list' %}">Cancelar</a><button class="button button-danger" type="submit">Eliminar registro</button></form></section>
+{% endblock %}

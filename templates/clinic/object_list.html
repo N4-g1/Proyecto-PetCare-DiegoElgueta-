@@ -1,0 +1,52 @@
+{% extends "clinic/base.html" %}
+{% block title %}{{ config.title }}{% endblock %}
+{% block breadcrumb %}{{ config.title }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><p class="overline">{{ config.title|upper }}</p><h1>{{ config.title }}</h1><p class="page-intro">{{ config.description }}</p></div>
+  <a class="button button-primary" href="{% url create_url %}{% if list_type == 'appointments' %}?date={{ selected_date }}{% endif %}"><span>＋</span> {% if list_type == 'appointments' %}Agendar cita{% elif list_type == 'records' %}Nueva ficha{% elif list_type == 'reminders' %}Nuevo seguimiento{% elif list_type == 'pets' %}Agregar mascota{% else %}Agregar tutor{% endif %}</a>
+</div>
+<section class="panel list-panel">
+  {% if list_type == "appointments" %}
+  <div class="agenda-datebar">
+    <a class="agenda-date-arrow" href="?date={{ previous_date|date:'Y-m-d' }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}" aria-label="Día anterior">←</a>
+    <form class="agenda-date-form" id="agenda-date-form" method="get">
+      <label for="agenda-date">Agenda del día</label>
+      <input id="agenda-date" type="date" name="date" value="{{ selected_date }}" aria-label="Selecciona el día de la agenda">
+      {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+      <button class="agenda-go-button" type="submit">Ver fecha</button>
+    </form>
+    <a class="agenda-date-arrow" href="?date={{ next_date|date:'Y-m-d' }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}" aria-label="Día siguiente">→</a>
+    {% if selected_date != today_date %}<a class="agenda-today-button" href="?date={{ today_date }}{% if query %}&amp;q={{ query|urlencode }}{% endif %}">Hoy</a>{% endif %}
+    <span class="agenda-date-caption">{{ page_obj.paginator.count }} cita{{ page_obj.paginator.count|pluralize:"s" }} programada{{ page_obj.paginator.count|pluralize:"s" }}</span>
+  </div>
+  {% endif %}
+  <form class="list-toolbar" method="get">
+    <label class="search-control"><span aria-hidden="true">⌕</span><input type="search" name="q" value="{{ query }}" placeholder="{{ config.search }}" aria-label="Buscar en {{ config.title|lower }}"></label>
+    {% if list_type == "appointments" %}<input type="hidden" name="date" value="{{ selected_date }}">{% endif %}
+    {% if list_type == "reminders" %}<label class="filter-label">Estado <select name="status"><option value="">Todos</option><option value="Pendiente" {% if selected_status == "Pendiente" %}selected{% endif %}>Pendiente</option><option value="Completado" {% if selected_status == "Completado" %}selected{% endif %}>Completado</option></select></label>{% endif %}
+    <button class="button button-filter" type="submit">Filtrar <span>⌄</span></button>
+    {% if query or selected_status %}<a class="clear-filter" href="{% url list_type|add:'_list' %}{% if list_type == 'appointments' %}?date={{ selected_date }}{% endif %}">Limpiar</a>{% endif %}
+    <span class="result-count">{{ page_obj.paginator.count }} registro{{ page_obj.paginator.count|pluralize:"s" }}</span>
+  </form>
+  <div class="table-scroll"><table class="data-table"><thead><tr>{% for column in config.columns %}<th>{{ column }}</th>{% endfor %}<th class="actions-heading">Acciones</th></tr></thead><tbody>
+    {% for item in items %}
+    <tr>
+      {% if list_type == "tutors" %}
+        <td><span class="table-identity"><span class="identity-icon tutor-icon">♙</span><span><strong>{{ item.name }}</strong><small>{{ item.pet_count }} paciente{{ item.pet_count|pluralize:"s" }}</small></span></span></td><td>{{ item.phone }}</td><td>{{ item.email|default:"—" }}</td><td>{{ item.pet_count }}</td>
+      {% elif list_type == "pets" %}
+        <td><span class="table-identity"><span class="identity-icon">{% if item.species == "Gato" %}♧{% else %}♡{% endif %}</span><span><strong>{{ item.name }}</strong><small>{{ item.get_sex_display|default:"Paciente" }}</small></span></span></td><td><strong>{% if item.species == "Otro" %}{{ item.species_detail }}{% else %}{{ item.get_species_display }}{% endif %}</strong><small class="subline">{{ item.breed|default:"Raza no especificada" }}</small></td><td><a class="table-link" href="{% url 'tutors_list' %}?q={{ item.tutor.name|urlencode }}">{{ item.tutor.name }}</a></td><td>{% if item.weight %}{{ item.weight }} kg{% else %}—{% endif %}</td>
+      {% elif list_type == "appointments" %}
+        <td><strong class="appointment-clock">{{ item.time|time:"H:i" }}</strong><small class="subline">{{ item.duration_minutes }} min · {{ item.date|date:"j M" }}</small></td><td><span class="table-identity"><span class="identity-icon">{% if item.pet.species == "Gato" %}♧{% else %}♡{% endif %}</span><span><strong>{{ item.pet.name }}</strong><small>{{ item.pet.tutor.name }}</small></span></span></td><td><strong>{{ item.veterinarian.name }}</strong><small class="subline">{{ item.veterinarian.specialty }}</small></td><td>{{ item.reason }}</td><td><span class="status status-{{ item.status|slugify }}">{{ item.get_status_display }}</span></td>
+      {% elif list_type == "records" %}
+        <td><span class="table-identity"><span class="identity-icon">{% if item.pet.species == "Gato" %}♧{% else %}♡{% endif %}</span><span><strong>{{ item.pet.name }}</strong><small>{% if item.pet.species == "Otro" %}{{ item.pet.species_detail }}{% else %}{{ item.pet.get_species_display }}{% endif %} · {{ item.pet.tutor.name }}</small></span></span></td><td>{{ item.date|date:"j M Y" }}</td><td>{{ item.veterinarian }}</td><td class="diagnosis-cell">{{ item.diagnosis|truncatechars:76 }}</td>
+      {% elif list_type == "reminders" %}
+        <td><span class="table-identity"><span class="identity-icon reminder-icon">◷</span><span><strong>{{ item.kind }}</strong><small>{{ item.notes|default:"Seguimiento preventivo"|truncatechars:48 }}</small></span></span></td><td>{{ item.pet.name }}</td><td><span class="{% if item.is_overdue %}date-overdue{% endif %}">{{ item.due_date|date:"j M Y" }}{% if item.is_overdue %}<small class="subline date-overdue">Vencido</small>{% endif %}</span></td><td>{{ item.pet.tutor.name }}</td><td><span class="status {% if item.status == 'Completado' %}status-completada{% elif item.is_overdue %}status-vencida{% else %}status-pendiente{% endif %}">{{ item.get_status_display }}</span></td>
+      {% endif %}
+      <td><span class="row-actions"><a class="row-action" href="{% url list_type|add:'_update' item.pk %}">Editar</a><a class="row-action row-action-delete" href="{% url list_type|add:'_delete' item.pk %}">Eliminar</a></span></td>
+    </tr>
+    {% empty %}<tr><td colspan="{{ config.columns|length|add:1 }}"><div class="empty-note list-empty"><span>⌕</span><strong>{% if query %}No encontramos coincidencias{% else %}Aún no hay registros{% endif %}</strong><p>Prueba otra búsqueda o crea el primer registro.</p><a href="{% url create_url %}">Crear registro →</a></div></td></tr>{% endfor %}
+  </tbody></table></div>
+  {% if is_paginated %}<nav class="pagination" aria-label="Paginación"><span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span><div>{% if page_obj.has_previous %}<a href="?{% querystring page=page_obj.previous_page_number %}">← Anterior</a>{% endif %}{% if page_obj.has_next %}<a href="?{% querystring page=page_obj.next_page_number %}">Siguiente →</a>{% endif %}</div></nav>{% endif %}
+</section>
+{% endblock %}

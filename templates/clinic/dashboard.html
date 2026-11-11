@@ -1,0 +1,47 @@
+{% extends "clinic/base.html" %}
+{% block title %}Resumen{% endblock %}
+{% block breadcrumb %}Resumen{% endblock %}
+{% block content %}
+<div class="welcome-row">
+  <div><p class="overline">{{ today|date:"l, j \\d\\e F \\d\\e Y"|upper }}</p><h1>{{ greeting }}, {{ greeting_name }}.</h1><p class="page-intro">La jornada de tu equipo, con todo en orden.</p></div>
+  <a class="button button-primary" href="{% url 'appointments_create' %}"><span>＋</span> Agendar una cita</a>
+</div>
+{% if overdue_count %}<a class="alert-banner" href="{% url 'reminders_list' %}?status=Pendiente"><span class="alert-symbol">!</span><span><strong>{{ overdue_count }} seguimiento{{ overdue_count|pluralize:"s" }} requiere{{ overdue_count|pluralize:"n" }} atención.</strong><small>Revisa los controles y vacunas que ya vencieron.</small></span><span class="alert-arrow">→</span></a>{% endif %}
+<section class="stat-grid" aria-label="Resumen de la clínica">
+  <article class="stat-card"><div class="stat-heading"><span>Familias</span><span class="stat-mark">♙</span></div><div class="stat-number">{{ tutor_count }}</div><p>Tutores registrados</p></article>
+  <article class="stat-card"><div class="stat-heading"><span>Pacientes</span><span class="stat-mark">♡</span></div><div class="stat-number">{{ pet_count }}</div><p>Mascotas en seguimiento</p></article>
+  <article class="stat-card"><div class="stat-heading"><span>Agenda de hoy</span><span class="stat-mark">▦</span></div><div class="stat-number">{{ appointment_count }}</div><p>Atenciones programadas</p></article>
+  <article class="stat-card"><div class="stat-heading"><span>Prevención</span><span class="stat-mark warm">◷</span></div><div class="stat-number">{{ pending_count }}</div><p>Recordatorios pendientes</p></article>
+</section>
+<div class="dashboard-columns">
+  <section class="panel agenda-panel">
+    <div class="panel-heading"><div><p class="overline">{% if agenda_date == today %}HOY EN LA CLÍNICA{% else %}PRÓXIMA JORNADA{% endif %}</p><h2>Agenda del día</h2><p class="section-note">{{ agenda_date|date:"l, j \\d\\e F" }}</p></div><a class="inline-link" href="{% url 'appointments_list' %}?date={{ agenda_date|date:'Y-m-d' }}">Ver agenda <span>→</span></a></div>
+    <div class="agenda-list">
+      {% for appointment in today_appointments %}
+      <article class="agenda-row"><time class="agenda-time">{{ appointment.time|time:"H:i" }}<small>{{ appointment.duration_minutes }} min</small></time><span class="animal-mark {% if appointment.pet.species == 'Gato' %}animal-cat{% endif %}">{% if appointment.pet.species == 'Gato' %}♧{% else %}♡{% endif %}</span><div class="agenda-patient"><strong>{{ appointment.pet.name }}</strong><span>{{ appointment.reason }}</span></div><div class="agenda-vet"><strong>{{ appointment.veterinarian.name }}</strong><span>{{ appointment.pet.tutor.name }}</span></div><span class="status status-{{ appointment.status|slugify }}">{{ appointment.get_status_display }}</span></article>
+      {% empty %}<div class="empty-note"><span>♡</span><strong>Un espacio para nuevas visitas</strong><p>La agenda todavía está libre para hoy.</p><a href="{% url 'appointments_create' %}">Programar atención →</a></div>{% endfor %}
+    </div>
+    <div class="panel-foot"><span>Atención programada · {{ today_appointments|length }} visita{{ today_appointments|length|pluralize:"s" }}</span><a href="{% url 'appointments_create' %}">Añadir cita ＋</a></div>
+  </section>
+  <aside class="right-rail">
+    <section class="panel follow-panel">
+      <div class="panel-heading compact"><div><p class="overline">CUIDADO PREVENTIVO</p><h2>Próximos controles</h2></div><a class="round-link" href="{% url 'reminders_list' %}" aria-label="Ver recordatorios">→</a></div>
+      <div class="follow-list">
+        {% for reminder in upcoming_reminders %}
+        <a class="follow-row" href="{% url 'reminders_list' %}">
+          <span class="follow-date {% if reminder.is_overdue %}follow-overdue{% endif %}"><strong>{{ reminder.due_date|date:"d" }}</strong><small>{{ reminder.due_date|date:"M"|upper }}</small></span>
+          <span class="follow-copy"><strong>{{ reminder.kind }}</strong><small>{{ reminder.pet.name }} · {{ reminder.pet.tutor.name }}</small></span>
+          {% if reminder.is_overdue %}<span class="mini-status overdue">Vencido</span>{% endif %}
+        </a>
+        {% empty %}<p class="quiet-empty">No hay controles pendientes.</p>{% endfor %}
+      </div>
+      <a class="follow-footer" href="{% url 'reminders_list' %}">Todos los recordatorios <span>→</span></a>
+    </section>
+    <section class="panel team-panel">
+      <div class="panel-heading compact"><div><p class="overline">EQUIPO VETERINARIO</p><h2>Profesionales activos</h2></div></div>
+      <div class="team-list">{% for veterinarian in veterinarians %}<div class="team-member"><span class="team-initial">{{ veterinarian.name|slice:"4:5"|upper }}</span><span><strong>{{ veterinarian.name }}</strong><small>{{ veterinarian.specialty }}</small></span><span class="team-active" title="Activo"></span></div>{% empty %}<p class="quiet-empty">Agrega profesionales desde Administración.</p>{% endfor %}</div>
+    </section>
+  </aside>
+</div>
+<div class="quick-links"><a href="{% url 'pets_create' %}"><span>♡</span><div><strong>Registrar paciente</strong><small>Añade una mascota y su tutor</small></div><b>→</b></a><a href="{% url 'records_create' %}"><span>▤</span><div><strong>Nueva ficha clínica</strong><small>Deja registro de una atención</small></div><b>→</b></a><a href="{% url 'reminders_create' %}"><span>◷</span><div><strong>Programar seguimiento</strong><small>Vacuna o control preventivo</small></div><b>→</b></a></div>
+{% endblock %}
