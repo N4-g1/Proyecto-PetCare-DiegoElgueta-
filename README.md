@@ -4,8 +4,7 @@
 **Desarrollado por:** Diego Alfredo Elgueta González  
 **Asignatura:** Desarrollo Backend - Evaluación Parcial N°3 (PetCare)  
 **Año:** 2026  
-**IP Pública AWS EC2:** [http://54.226.155.169/](http://54.226.155.169/)  
-**Django Admin AWS:** [http://54.226.155.169/admin/](http://54.226.155.169/admin/)
+**IP Pública AWS EC2:** http://54.92.196.101/ 
 
 
 
